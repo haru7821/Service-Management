@@ -470,10 +470,14 @@ function renderAcBar(){
   const accs=Object.keys(map).filter(Boolean).sort();
   if(accs.length<2){bar.style.display='none';return;}
   bar.style.display='flex';
-  bar.innerHTML=[{n:'전체',c:EQ.length},...accs.map(a=>({n:a,c:map[a]}))].map(a=>
-    '<div class="achip '+((!aAcc&&a.n==='전체')||aAcc===a.n?'on':'')+'" onclick="setAcc(\"'+a.n+'\")">'+
-    a.n+'<span class="acnt">'+a.c+'</span></div>'
-  ).join('');
+  bar.innerHTML='';
+  [{n:'전체',c:EQ.length},...accs.map(a=>({n:a,c:map[a]}))].forEach(a=>{
+    const d=document.createElement('div');
+    d.className='achip'+((!aAcc&&a.n==='전체')||aAcc===a.n?' on':'');
+    d.innerHTML=esc(a.n)+'<span class="acnt">'+a.c+'</span>';
+    d.addEventListener('click',()=>setAcc(a.n));
+    bar.appendChild(d);
+  });
 }
 function setAcc(name){ aAcc=name==='전체'?'':name; renderAcBar();renderRec();renderEq();renderSch(); }
 
