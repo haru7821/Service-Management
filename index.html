@@ -471,7 +471,7 @@ function renderAcBar(){
   if(accs.length<2){bar.style.display='none';return;}
   bar.style.display='flex';
   bar.innerHTML=[{n:'전체',c:EQ.length},...accs.map(a=>({n:a,c:map[a]}))].map(a=>
-    '<div class="achip '+((!aAcc&&a.n==='전체')||aAcc===a.n?'on':'')+'" onclick="setAcc(''+a.n+'')">'+
+    '<div class="achip '+((!aAcc&&a.n==='전체')||aAcc===a.n?'on':'')+'" onclick="setAcc(\"'+a.n+'\")">'+
     a.n+'<span class="acnt">'+a.c+'</span></div>'
   ).join('');
 }
@@ -497,12 +497,18 @@ function eqSearch(pfx){
     (e.productName||'').toLowerCase().includes(q)
   ).slice(0,40);
   if(!res.length){dd.classList.remove('on');return;}
-  dd.innerHTML=res.map(eq=>
-    '<div class="eqitm" onmousedown="event.preventDefault()" onclick="selEq(''+pfx+'',''+eq.id+'')">'+
-    '<div class="en">'+esc(eq.accountName||'—')+'&nbsp;·&nbsp;<span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--t)">'+esc(eq.serialNumber)+'</span></div>'+
-    '<div class="ed">'+esc(eq.productName||'')+(eq.installDate?' · 설치 '+eq.installDate:'')+'</div>'+
-    '</div>'
-  ).join('');
+  dd.innerHTML='';
+  res.forEach(eq=>{
+    const div=document.createElement('div');
+    div.className='eqitm';
+    div.innerHTML=
+      '<div class="en">'+esc(eq.accountName||'—')+'&nbsp;·&nbsp;'+
+      '<span style="font-family:DM Mono,monospace;font-size:12px;color:var(--t)">'+esc(eq.serialNumber)+'</span></div>'+
+      '<div class="ed">'+esc(eq.productName||'')+(eq.installDate?' · 설치 '+eq.installDate:'')+'</div>';
+    div.addEventListener('mousedown',e=>e.preventDefault());
+    div.addEventListener('click',()=>selEq(pfx,eq.id));
+    dd.appendChild(div);
+  });
   dd.classList.add('on');
 }
 function selEq(pfx,id){
@@ -567,12 +573,12 @@ function renderRec(){
   // 테이블
   document.getElementById('recTbody').innerHTML=s.map(r=>
     '<tr>'+
-    '<td rowspan="2" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--mu);vertical-align:middle;border-right:1px solid var(--b)">'+r.date+'</td>'+
+    '<td rowspan="2" style="font-family:DM Mono,monospace;font-size:12px;color:var(--mu);vertical-align:middle;border-right:1px solid var(--b)">'+r.date+'</td>'+
     '<td style="padding-bottom:3px"><strong style="color:var(--f);font-size:13px">'+esc(r.equipmentName||'—')+'</strong> <span class="sn" style="margin-left:4px">'+esc(r.serialNumber||'')+'</span></td>'+
     '<td rowspan="2" style="vertical-align:middle"><span class="bdg '+tcls(r.serviceType)+'">'+esc(r.serviceType||'—')+'</span></td>'+
     '<td style="font-size:12px;color:var(--dim)">'+esc(r.description||'—')+'</td>'+
     '<td rowspan="2" style="font-size:12px;color:var(--dim);vertical-align:middle;text-align:center">'+esc(r.engineer||'—')+'</td>'+
-    '<td rowspan="2" style="vertical-align:middle;text-align:center"><button class="btn bd bsm" onclick="delRec(''+r.id+'')">삭제</button></td>'+
+    '<td rowspan="2" style="vertical-align:middle;text-align:center"><button class="btn bd bsm" data-id="'+r.id+'" onclick="delRec(this.dataset.id)">삭제</button></td>'+
     '</tr>'+
     '<tr>'+
     '<td style="font-size:11px;color:var(--mu);padding-top:2px">'+esc(r.serialNumber||'')+'</td>'+
@@ -585,7 +591,7 @@ function renderRec(){
     '<div class="rc1">'+
     '<span class="rdate">'+r.date+'</span>'+
     '<span class="bdg '+tcls(r.serviceType)+'">'+esc(r.serviceType||'—')+'</span>'+
-    '<button class="btn bd bsm" style="margin-left:auto" onclick="delRec(''+r.id+'')">삭제</button>'+
+    '<button class="btn bd bsm" style="margin-left:auto" data-id="'+r.id+'" onclick="delRec(this.dataset.id)">삭제</button>'+
     '</div>'+
     '<div class="rc2"><strong class="rname">'+esc(r.equipmentName||'—')+'</strong><span class="sn">'+esc(r.serialNumber||'')+'</span></div>'+
     (r.description?'<div class="rdesc">'+esc(r.description)+'</div>':'')+
@@ -741,8 +747,8 @@ function renderSch(){
       '<div style="display:flex;align-items:center;justify-content:space-between">'+
       '<span class="sdate">📅 '+s.date+(s.interval>0?' · '+s.interval+'일 주기':' · 단발')+'</span>'+
       '<div style="display:flex;gap:6px">'+
-      '<button class="btn bp bsm" onclick="doneSch(''+s.id+'')">완료</button>'+
-      '<button class="btn bd bsm" onclick="delSch(''+s.id+'')">삭제</button>'+
+      '<button class="btn bp bsm" data-id="'+s.id+'" onclick="doneSch(this.dataset.id)">완료</button>'+
+      '<button class="btn bd bsm" data-id="'+s.id+'" onclick="delSch(this.dataset.id)">삭제</button>'+
       '</div></div>'+
       (s.note?'<div style="font-size:11px;color:var(--mu)">'+esc(s.note)+'</div>':'')+
       '</div>';
